@@ -2,8 +2,10 @@
 #include <stdio.h>
 
 int main() {
-	printf("Longitud Máxima de Argumentos: %ld\n", sysconf(_SC_ARG_MAX));
-	printf("Número máximo de hijos: %ld\n", sysconf(_SC_CHILD_MAX));
-	printf("Número máximo de ficheros: %ld\n", sysconf(_SC_OPEN_MAX));
+
+	printf("Longitud maxima de argumentos: %ld\n", sysconf(_SC_ARG_MAX));
+	printf("Numero maximo de hijos: %ld\n", sysconf(_SC_CHILD_MAX));
+	printf("Numero maximo de ficheros: %ld\n", sysconf(_SC_OPEN_MAX));
+
 	return 0;
 }
