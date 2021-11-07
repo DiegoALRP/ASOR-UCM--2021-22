@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 	printf("Tipo de archivo: ", buf.st_mode);
 	if (S_ISLNK(proteccion))printf("enalce simbolico.\n");
 	else if (S_ISREG(proteccion)) printf("fichero.\n");
-	else if (S_ISLNK(proteccion)) printf("directorio.\n");
+	else if (S_ISDIR(proteccion)) printf("directorio.\n");
 
 	printf("Ultima hora accedida: %d/%d/%d %d:%d\n", tiempo.tm_mday, tiempo.tm_mon +1, tiempo.tm_year +1900, tiempo.tm_hour, tiempo.tm_min);
 	
