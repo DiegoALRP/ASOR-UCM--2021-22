@@ -27,8 +27,7 @@ int main(int argc, char **argv) {
 			printf("Esta es una cadena de prueba\n");
 			printf("1, 2, 3,... probando");
 
-			
-			fprintf(stderr, "Prueba: salida de error!");
+			fprintf(stderr, "Prueba: salida de error!\n");
 		}
 	}
 }
