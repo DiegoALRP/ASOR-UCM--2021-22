@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
 	unsigned int majorN = major(buf.st_dev);
 	unsigned int minorN = minor(buf.st_dev);
 	mode_t proteccion = buf.st_mode;
-	struct tm *tiempo = localtime(&(buf.st_atime));
+	struct tm tiempo = *localtime(&(buf.st_atime));
 	setlocale(LC_ALL, "es_ES");
 
 	printf("Numero major: '%d', asociado al dispositivo.\n", majorN);
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 	else if (S_ISREG(proteccion)) printf("fichero.\n");
 	else if (S_ISLNK(proteccion)) printf("directorio.\n");
 
-	printf("Ultima hora accedida: %d/%d/%d %d:%d\n", tiempo->tm_mday, tiempo->tm_mon +1, tiempo->tm_year +1900, tiempo->tm_hour, tiempo->tm_min);
+	printf("Ultima hora accedida: %d/%d/%d %d:%d\n", tiempo.tm_mday, tiempo.tm_mon +1, tiempo.tm_year +1900, tiempo.tm_hour, tiempo.tm_min);
 	
 	/*
 	* La diferecia entre st_mtime y st_ctime:
