@@ -21,8 +21,10 @@ int main(int argc, char **argv) {
 
 		char* symPath;
 		char* hardPath;
+
 		symPath = malloc(strlen(path));
 		hardPath = malloc(strlen(path));
+
 		strcpy(symPath, path);
 		strcat(symPath, ".sym");
 		strcpy(hardPath, path);
@@ -39,6 +41,11 @@ int main(int argc, char **argv) {
 			printf("Ruta hard: %s\n", hardPath);
 		}
 		
+		free(symPath);
+		free(hardPath);
 	}
-	else printf("No es un fichero regular\n");
+	else {
+		
+		printf("No es un fichero regular\n");
+	}
 }
