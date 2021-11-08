@@ -37,6 +37,8 @@ int main(int argc, char **argv) {
 	else if (S_ISDIR(proteccion)) printf("directorio.\n");
 
 	printf("Ultima hora accedida: %d/%d/%d %d:%d\n", tiempo.tm_mday, tiempo.tm_mon +1, tiempo.tm_year +1900, tiempo.tm_hour, tiempo.tm_min);
+
+	close(fd);
 	
 	/*
 	* La diferecia entre st_mtime y st_ctime:
@@ -44,4 +46,6 @@ int main(int argc, char **argv) {
 	* por un write, mientras que "st_ctime" se refiere la cuando
 	* se altera el inodo, por modificacion de propietario, permiso.
 	*/
+
+	return 0;
 }
