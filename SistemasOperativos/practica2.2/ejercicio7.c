@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
 
 	mode_t mascara = umask(0027);
 
-	int fd = open(pathname, O_CREAT | O_TRUNC | O_RDWR, 645);
+	int fd = open(pathname, O_CREAT | O_TRUNC | O_RDWR, 0777);
 	
 	if (fd == -1) {
 		
