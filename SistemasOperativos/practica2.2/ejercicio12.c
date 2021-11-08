@@ -27,4 +27,7 @@ int main(int argc, char **argv) {
 			printf("1, 2, 3,... probando");
 		}
 	}
+
+	close(fd);
+	return 0;
 }
