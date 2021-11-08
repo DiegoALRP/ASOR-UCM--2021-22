@@ -18,4 +18,7 @@ int main(int argc, char **argv) {
 		
 		printf("FileDescriptor: %d\n", fd);
 	}
+
+	close(fd);
+	return 0;
 }
