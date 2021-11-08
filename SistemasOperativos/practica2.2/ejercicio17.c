@@ -38,16 +38,16 @@ int main(int argc, char **argv) {
 					
 					//Nombre del fichero
 
-					if (statBuf.st_mode & S_IXUSR) printf("%s*\n", dirStr->d_name); //Fichero ejecutable
-					else printf("%s\n", dirStr->d_name);    //Fichero regular
+					if (statBuf.st_mode & S_IXUSR) printf("%s*\n", dirStr->d_name); //Fichero con permisos de ejecucion
+					else printf("%s\n", dirStr->d_name);  //Fichero regular
 
 					kiloB += statBuf.st_size;
 				}
-				else if (dirStr->d_type == DT_DIR) {    //Directorio
+				else if (dirStr->d_type == DT_DIR) { //Directorio
 
 					printf("%s/\n", dirStr->d_name);
 				}
-				else if (dirStr->d_type == DT_LNK) {
+				else if (dirStr->d_type == DT_LNK) { //Enlace simbolico
 
 					char* buf;
 					ssize_t bufsiz, nbytes;
@@ -62,20 +62,22 @@ int main(int argc, char **argv) {
 
 					if (buf == NULL) {
 
-                            perror("malloc");
-                            exit(EXIT_FAILURE);
+               					perror("malloc");
+               					exit(EXIT_FAILURE);
            				}
 
 					nbytes = readlink(dirStr->d_name, buf, bufsiz);
-                    if (nbytes == -1) {
+           				if (nbytes == -1) {
 
-                        perror("readlink");
-                        exit(EXIT_FAILURE);
-                    }
+               					perror("readlink");
+               					exit(EXIT_FAILURE);
+           				}
 
 					printf("%s->%s\n",dirStr->d_name, buf);
 
 					kiloB += statBuf.st_size;
+
+					free(buf);
 				}
 			
 				dirStr = readdir(dir);
@@ -84,4 +86,5 @@ int main(int argc, char **argv) {
 			printf("\nEl tamaño total que ocupan los ficheros es de: %.2f kilobytes\n", kiloB/1000);
 		}
 	}
+	
 }
