@@ -28,4 +28,6 @@ int main(int argc, char **argv) {
 		printf("Hora actual: %d/%d/%d %d:%d\n", tiempo.tm_mday, tiempo.tm_mon +1, tiempo.tm_year +1900, tiempo.tm_hour, tiempo.tm_min);
 		sleep(30);
 	}
-}
+
+	close(fd);
+	return 0;

@@ -30,4 +30,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Prueba: salida de error!\n");
 		}
 	}
+
+	close(fd);
+	return 0;
 }
