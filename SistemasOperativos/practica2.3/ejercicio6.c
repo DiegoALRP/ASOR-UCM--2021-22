@@ -31,19 +31,24 @@ private void printAttributes() {
 int main(int argc, char **argv) {
 
 	//Crear un proceso hijo
-	pid_t pid = fork(void);
+	pid_t pid;
+	pid = fork(void);
 
-	if (pid == 0) {	//Proceso Hijo
+	switch (pid) {
+		case -1: //Error al crear proceso
+			
+			perror("fork");
+			exit(1);
 
-		printf("Proceso Hijo");
-	}
-	else if (pid > 0) {	//Proceso Padre
+		case 0:	//Proceso Hijo
 
-		printf("Proceso Padre");
-	}
-	else {
+			printf("Proceso Hijo, PID: %i (Padre: %i)\n", getpid(), getppid());
+			break;
 
-		printf("ERROR %i -> %s\n", errno, strerror(errno));
+		default: //Proceso Padre
+
+			printf("Proceso Padre, PID: %i (Hijo: %i)\n", getpid(), pid);
+			break;
 	}
 
 	return 0;
