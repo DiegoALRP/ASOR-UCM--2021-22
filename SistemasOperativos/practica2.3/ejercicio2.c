@@ -10,28 +10,28 @@ int main(int argc, char **argv) {
 	printf("pid: %d\n", pid);
 
 	//Obtener la politica de planificacion
-	int polit = sched_getscheduler(pid);
+	int policy = sched_getscheduler(pid);
 
 	// 0: SCHED_OTHER
 	// 1: SCHED_FIFO
 	// 2: SCHED_RR
 
-	printf("Plotica numero: %d\n", polit);
+	printf("Plotica numero: %d\n", policy);
 
-	if (polit == -1) {
+	if (policy == -1) {
 
 		printf("ERROR %i -> %s\n", errno, strerror(errno));
 	}
-	else if (polit == SCHED_OTHER) {
+	else if (policy == SCHED_OTHER) {
 
 		printf("Politica: %s\n", "SCHED_OTHER");
 		
 	}
-	else if (polit == SCHED_FIFO) {
+	else if (policy == SCHED_FIFO) {
 
 		printf("Politica: %s\n", "SCHED_FIFO");
 	}
-	else if (polit == SCHED_RR) {
+	else if (policy == SCHED_RR) {
 
 		printf("Politica: %s\n", "SCHED_RR");
 	}
@@ -49,10 +49,11 @@ int main(int argc, char **argv) {
 	else {
 
 		printf("Prioridad: %d\n", p.sched_priority);
+
+		int max_priority = sched_get_priority_max(policy);
+		int min_priority = sched_get_priority_min(policy);
+
+		printf("Maxima Prioridad: %d\n", max_priority);
+		printf("Minima Prioridad: %d\n", min_priority);
 	}
-
-
-
-
-
 }
