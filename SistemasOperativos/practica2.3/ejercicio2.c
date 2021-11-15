@@ -36,5 +36,23 @@ int main(int argc, char **argv) {
 		printf("Politica: %s\n", "SCHED_RR");
 	}
 
-	
+	//Obtener prioridad de planificacion
+
+	struct sched_param p;
+
+	int priority = sched_getparam(pid, &p);
+
+	if (priority == -1) {
+
+		printf("ERROR %i -> %s\n", errno, strerror(errno));
+	}
+	else {
+
+		printf("Prioridad: %d\n", p.sched_priority);
+	}
+
+
+
+
+
 }
