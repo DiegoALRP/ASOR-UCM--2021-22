@@ -51,4 +51,6 @@ int main(int argc, char **argv) {
 	printf("\nDirectorio de trabajo actual: %s\n\n", buffer);
 
 	free(buffer);
+
+	return 0;
 }
