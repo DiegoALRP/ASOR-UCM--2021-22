@@ -1,8 +1,13 @@
 #include <stdio.h>
 #include <errno.h>
+//PIDs y Directorio
 #include <unistd.h>
+//Limites de recursos
 #include <sys/time.h>
 #include <sys/resource.h>
+//Malloc
+#include <limits.h>
+#include <stdlib.h>
 
 int main(int argc, char **argv) {
 
@@ -37,4 +42,13 @@ int main(int argc, char **argv) {
 		printf("Valor maximo: %d\n", lim.rlim_max);
 	}
 
+	char* buffer;
+	size_t size = PATH_MAX + 1;
+	buffer = malloc(size);
+
+	getcwd(buffer, size);
+
+	printf("\nDirectorio de trabajo actual: %s\n\n", buffer);
+
+	free(buffer);
 }
