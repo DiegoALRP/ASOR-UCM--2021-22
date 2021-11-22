@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <errno.h>
+//Planificador
 #include <sched.h>
-#include <unistd.h>
 
 int main(int argc, char **argv) {
 
