@@ -11,7 +11,14 @@ int main(int argc, char **argv) {
 
 	int i = system(argv[1]);
 
-	printf("El comando terminó de ejecutarse\n");
+	if (i == -1) {
+
+		printf("ERROR: el comando no se ha ejecutado correctamente!");
+	}
+	else {
+
+		printf("El comando terminó de ejecutarse\n");
+	}
 
 	return 0;
 }
