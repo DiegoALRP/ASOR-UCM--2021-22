@@ -4,6 +4,8 @@
 #include <string.h>
 
 //para depurar: gcc -g wall ejercicio2.c
+//gdb a.out
+//layout next
 
 int main(int argc, char** argv) {
 
