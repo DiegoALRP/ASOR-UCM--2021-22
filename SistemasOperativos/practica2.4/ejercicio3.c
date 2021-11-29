@@ -7,3 +7,4 @@
 *
 * proceso que lee: cat tuberia3
 * (sale 12345)
+*/
