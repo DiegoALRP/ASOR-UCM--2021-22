@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
+//para depurar: gcc -g wall ejercicio2.c
 
 int main(int argc, char** argv) {
 
