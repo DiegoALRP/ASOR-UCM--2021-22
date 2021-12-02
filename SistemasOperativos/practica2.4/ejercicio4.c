@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-//mkfifo
+//mknod
 #include <sys/types.h>
 #include <sys/stat.h>
 //open
