@@ -48,6 +48,30 @@ int main(int argc, char** argv) {
 	hints.ai_addr = NULL;
 	hints.ai_next = NULL;
 
+	int rc = getaddrinfo(
+					argv[1],
+					argv[2],
+					&hints,
+					&resultInfo);
+
+	if (rc != 0) {
+
+	if (rc == -1) {
+
+		printf("Error sendto()\n");
+		return -1;
+	}
+
+	char buf[50];
+	struct sockaddr_storage addr;
+	socklen_t addr_len = sizeof(addr);
+	
+	int bytes = recvfrom(socketUDP, buf, 50, 0, (struct sockaddr *) &addr, &addr_len);
+	buf[bytes] = '\0';
+
+	printf("Recibido: %s\n", buf);
+
+	freeaddrinfo(resultInfo);
 
 	return 0;
 }
