@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
 		}
 		else {
 
-			buf[bytes-1]='\0';
+			buf[bytes-1]='\0';  //Para eliminar el salto de linea que envia el cliente
 			printf("Comando %s no soportado \n", buf);
 		}
 
