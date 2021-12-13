@@ -127,35 +127,36 @@ int main(int argc, char** argv) {
 
 		if (buf[0] == 't') {
 
-			ssize_t bytesTiempo = strftime(stringTiempo, max, "%H:%M:%S
+			ssize_t bytesHora = strftime(stringTiempo, max, "%H:%M:%S \n", tm);
+
+			stringTiempo[bytesHora] = '\0';
+
+			sendto(socketUDP, stringTiempo, bytesHora, 0, 
+					(struct sockaddr *) &cliente_addr, cliente_addrlen);
+		}
+		else if (buf[0] == 'd') {
+
+			ssize_t bytesFecha = strftime(stringTiempo, max, "%y-%m-%d \n", tm);
+
+			sendto(socketUDP, stringTiempo, bytesFecha, 0, 
+					(struct sockaddr *) &cliente_addr, cliente_addrlen);
+		}
+		else if (buf[0] == 'q') {
+
+			printf("Saliendo... \n");
+
+			close(socketUDP);
+
+			return 0;
+		}
+		else {
+
+			printf("Comando %s no soportado \n", buf);
 		}
 
 	}
 
-	for (i = res; i != NULL; i = i->ai_next) {
-
-		int addr = getnameinfo(i->ai_addr, 
-							i->ai_addrlen,
-							host, NI_MAXHOST,
-							NULL,
-							0,
-							NI_NUMERICHOST);
-
-		printf("Dir. Cliente: %s\n", host);
-		printf("Familia de direcciones: %d\n", i->ai_family);
-		printf("Tipo de Socket: %d\n", i->ai_socktype);
-
-		/*
-		* Recordar:
-		* Las familias 2 y 10 son AF_INET y AF_INET6, respectivamente (ver socket.h)
-		* Los tipos 1, 2, 3 son SOCK_STREAM, SOCK_DGRAM y SOCK_RAW, respectivamente
-		*/
-	}
-
-	freeaddrinfo(res);
-
 	return 0;
-
 }
 
 
