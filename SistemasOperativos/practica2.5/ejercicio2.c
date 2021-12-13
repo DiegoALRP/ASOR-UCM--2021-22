@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 //Gestión de Direcciones (getaddrinfo)
+//Socket
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -10,17 +11,17 @@
 
 int main(int argc, char** argv) {
 
-	if (argc != 2) {
+	if (argc != 3) {
 
-		printf("Introduce los parámetros necesarios: %s <nombre host o dirección>", argv[0]);
+		printf("Introduce los parámetros necesarios: %s <dirección> <puerto>", argv[0]);
 		return -1;
 	}
 
-	printf("1: %s, 2: %s \n", argv[1], argv[2]);
+	printf("argv[1]: %s\n, argv[2]: %s\n", argv[1], argv[2]);
 	
 	//Gestión de Direcciones
 	struct addrinfo hints;
-	struct addrinfo *res;
+	struct addrinfo *resultInfo;
 
 	//Sockets
 	//struct sockaddr_in;
@@ -35,9 +36,9 @@ int main(int argc, char** argv) {
 	hints.ai_family = AF_UNSPEC;
 
 	//ai.socktype especifica el tipo de socket a buscar.
-	// SOCK_STREAM, SOCK_DATAGRAM (como en UDP).
+	// SOCK_STREAM, SOCK_DGRAM (como en UDP).
 	// Para nuestro caso, como queremos cualquiera, le asignamos 0.
-	hints.ai_socktype = 0;
+	hints.ai_socktype = SOCK_DGRAM;
 
 	//Especifica el protocolo de los sockets a retornar.
 	// Le asignamos 0 para indicar que puede ser cualquier protocolo
@@ -52,42 +53,74 @@ int main(int argc, char** argv) {
 	hints.ai_addr = NULL;
 	hints.ai_next = NULL;
 
-	int result = getaddrinfo(
+	int rc = getaddrinfo(
 					argv[1],
-					NULL,
+					argv[2],
 					&hints,
-					&res);
+					&resultInfo);
 
-	if (result != 0) {
+	if (rc != 0) {
 
-		printf("getaddrinfo: %s \n", gai_strerror(result));
+		printf("getaddrinfo: %s \n", gai_strerror(rc));
 		return -1;
 	}
-	else {
 
-		char host[NI_MAXHOST];
-		struct addrinfo *i;
+	int socketUDP = socket(resultInfo->ai_family, resultInfo->ai_socktype, 0);
 
-		for (i = res; i != NULL; i = i->ai_next) {
+	if (socketUDP == -1) {
 
-			int addr = getnameinfo(i->ai_addr, 
-								i->ai_addrlen,
-								host, NI_MAXHOST,
-								NULL,
-								0,
-								NI_NUMERICHOST);
+		printf("Error socket UDP");
+		return -1;
+	}
 
-			printf("Host: %s\n", host);
-			printf("Familia de direcciones: %d\n", i->ai_family);
-			printf("Tipo de Socket: %d\n", i->ai_socktype);
+	int bind(socketUDP, (struct sockaddr *) resultInfo->ai_addr, resultInfo->ai_addrlen);
 
-			/*
-			* Recordar:
-			* Las familias 2 y 10 son AF_INET y AF_INET6, respectivamente (ver socket.h)
-			* Los tipos 1, 2, 3 son SOCK_STREAM, SOCK_DGRAM y SOCK_RAW, respectivamente
-			*/
+	if (bind == -1) {
 
-		}
+		printf("Error bind");
+		return -1;
+	}
+
+	freeaddrinfo(resultInfo);
+
+	char buf[2];
+	char host[NI_MAXHOST];
+	char serv[NI_MAXSERV];
+
+	struct sockaddr_storage cliente_addr;
+	socklen_t cliente_addrlen = sizeof(struct sockaddr_storage);
+
+	while (1) {
+
+		ssize_t bytes = recvfrom(socketUDP, buf, 2, 0, (struct sockaddr *) &cliente_addr,
+									cliente_addrlen);
+		buf[bytes] = '\0';
+
+		getnameinfo((struct sockaddr *) &cliente_addr,
+					cliente_addrlen, host, NI_MAXHOST,
+					serv, NI_MAXSERV, NI_NUMERICHOST|NI_NUMERICSERV);
+
+		printf("Se han recibido %d bytes de host: %s, serv: %s\n", bytes, host, serv);
+	}
+
+	for (i = res; i != NULL; i = i->ai_next) {
+
+		int addr = getnameinfo(i->ai_addr, 
+							i->ai_addrlen,
+							host, NI_MAXHOST,
+							NULL,
+							0,
+							NI_NUMERICHOST);
+
+		printf("Dir. Cliente: %s\n", host);
+		printf("Familia de direcciones: %d\n", i->ai_family);
+		printf("Tipo de Socket: %d\n", i->ai_socktype);
+
+		/*
+		* Recordar:
+		* Las familias 2 y 10 son AF_INET y AF_INET6, respectivamente (ver socket.h)
+		* Los tipos 1, 2, 3 son SOCK_STREAM, SOCK_DGRAM y SOCK_RAW, respectivamente
+		*/
 	}
 
 	freeaddrinfo(res);
