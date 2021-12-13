@@ -56,6 +56,33 @@ int main(int argc, char** argv) {
 
 	if (rc != 0) {
 
+		printf("getaddrinfo: %s \n", gai_strerror(rc));
+		return -1;
+	}
+
+	int socketUDP = socket(resultInfo->ai_family, resultInfo->ai_socktype, 0);
+
+	if (socketUDP == -1) {
+
+		printf("Error socket UDP\n");
+		return -1;
+	}
+
+	
+	rc = connect(socketUDP, resultInfo->ai_addr, resultInfo->ai_addrlen);
+
+	if (rc == -1) {
+
+		printf("Error connect()\n");
+		return -1;
+	}
+
+	char cmd[2];
+	cmd[0] = argv[3][0];
+	cmd[1] = '\0';
+
+	rc = sendto(socketUDP, cmd, 2, 0, resultInfo->ai_addr, resultInfo->ai_addrlen);
+
 	if (rc == -1) {
 
 		printf("Error sendto()\n");
@@ -75,11 +102,6 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
-
-
-
-
-
 
 
 
