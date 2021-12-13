@@ -7,6 +7,8 @@
 #include <netdb.h>
 //memset
 #include <string.h>
+//time
+#include <time.h>
 
 
 int main(int argc, char** argv) {
@@ -69,7 +71,7 @@ int main(int argc, char** argv) {
 
 	if (socketUDP == -1) {
 
-		printf("Error socket UDP");
+		printf("Error socket UDP\n");
 		return -1;
 	}
 
@@ -87,6 +89,8 @@ int main(int argc, char** argv) {
 	char host[NI_MAXHOST];
 	char serv[NI_MAXSERV];
 
+	int nameInfo;
+
 	struct sockaddr_storage cliente_addr;
 	socklen_t cliente_addrlen = sizeof(struct sockaddr_storage);
 
@@ -94,13 +98,38 @@ int main(int argc, char** argv) {
 
 		ssize_t bytes = recvfrom(socketUDP, buf, 2, 0, (struct sockaddr *) &cliente_addr,
 									cliente_addrlen);
+		
+		if (bytes == -1) {
+
+			printf("Error recieve from\n");
+			return -1;
+		}
+
 		buf[bytes] = '\0';
 
-		getnameinfo((struct sockaddr *) &cliente_addr,
+		nameInfo = getnameinfo((struct sockaddr *) &cliente_addr,
 					cliente_addrlen, host, NI_MAXHOST,
 					serv, NI_MAXSERV, NI_NUMERICHOST|NI_NUMERICSERV);
 
+		if (nameInfo == -1) {
+
+			printf("Error getnameinfo\n");
+			return -1;
+		}
+
 		printf("Se han recibido %d bytes de host: %s, serv: %s\n", bytes, host, serv);
+
+
+		time_t tiempo = time(NULL);
+		struct tm *tm = localtime(&tiempo);
+		size_t max = 50;
+		char stringTiempo[max];
+
+		if (buf[0] == 't') {
+
+			ssize_t bytesTiempo = strftime(stringTiempo, max, "%H:%M:%S
+		}
+
 	}
 
 	for (i = res; i != NULL; i = i->ai_next) {
