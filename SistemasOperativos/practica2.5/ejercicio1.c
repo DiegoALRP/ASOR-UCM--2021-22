@@ -12,11 +12,9 @@ int main(int argc, char** argv) {
 
 	if (argc != 2) {
 
-		printf("Introduce los parámetros necesarios: %s <nombre host o dirección>", argv[0]);
+		printf("Introduce los parámetros necesarios: %s <nombre host o dirección>\n", argv[0]);
 		return -1;
 	}
-
-	printf("1: %s, 2: %s \n", argv[1], argv[2]);
 	
 	//Gestión de Direcciones
 	struct addrinfo hints;
