@@ -15,11 +15,11 @@ int main(int argc, char** argv) {
 
 	if (argc != 3) {
 
-		printf("Introduce los parámetros necesarios: %s <dirección> <puerto>", argv[0]);
+		printf("Introduce los parámetros necesarios: %s <dirección> <puerto>\n", argv[0]);
 		return -1;
 	}
 
-	printf("argv[1]: %s\n, argv[2]: %s\n", argv[1], argv[2]);
+	printf("argv[1]: %s\nargv[2]: %s\n", argv[1], argv[2]);
 	
 	//Gestión de Direcciones
 	struct addrinfo hints;
@@ -75,11 +75,11 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 
-	int bind(socketUDP, (struct sockaddr *) resultInfo->ai_addr, resultInfo->ai_addrlen);
+	int b = bind(socketUDP, (struct sockaddr *) resultInfo->ai_addr, resultInfo->ai_addrlen);
 
-	if (bind == -1) {
+	if (b == -1) {
 
-		printf("Error bind");
+		printf("Error bind\n");
 		return -1;
 	}
 
@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
 	while (1) {
 
 		ssize_t bytes = recvfrom(socketUDP, buf, 2, 0, (struct sockaddr *) &cliente_addr,
-									cliente_addrlen);
+									&cliente_addrlen);
 		
 		if (bytes == -1) {
 
@@ -151,6 +151,7 @@ int main(int argc, char** argv) {
 		}
 		else {
 
+			buf[bytes-1]='\0';
 			printf("Comando %s no soportado \n", buf);
 		}
 
@@ -158,10 +159,3 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
-
-
-
-
-
-
-
