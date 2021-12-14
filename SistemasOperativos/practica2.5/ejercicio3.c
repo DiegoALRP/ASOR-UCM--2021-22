@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
 	}
 
 	char cmd[2];
-	cmd[0] = argv[3][0];
+	cmd[0] = argv[3][0]; // argv[3][0] significa obtener el primer caracter del 3er string
 	cmd[1] = '\0';
 
 	rc = sendto(socketUDP, cmd, 2, 0, resultInfo->ai_addr, resultInfo->ai_addrlen);
@@ -102,6 +102,7 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
+
 
 
 
