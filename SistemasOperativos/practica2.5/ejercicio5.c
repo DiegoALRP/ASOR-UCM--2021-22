@@ -14,6 +14,8 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <signal.h>
+#include <stdio.h>
 
 #define N 2
 
@@ -76,11 +78,6 @@ int main(int argc, char** argv) {
 
 	freeaddrinfo(resultInfo);
 	
-	//time_t tiempo = time(NULL);
-	//struct tm *tm = localtime(&tiempo);
-	//size_t max = 50;
-	//char stringTiempo[max];
-
 	int nameInfo;
 	
 	int i;
@@ -89,197 +86,40 @@ int main(int argc, char** argv) {
 		pid_t pid;
 		pid = fork();
 		
-		switch (pid) {
+		if (pid == -1) {
 		
-			case -1:
-				
-				perror("Error fork()");
-				return -1;
-			break;
-			//Hijo
-			case 0: ;
-			
-				while (1) {
-
-					char buf[80];
-					char host[NI_MAXHOST];
-					char serv[NI_MAXSERV];
-					
-					struct sockaddr_storage client_addr;
-					socklen_t client_addrlen = sizeof(struct sockaddr_storage);
+			perror("Error fork()");
+			return -1;
+		}
+		else if (pid == 0) {
 		
-					ssize_t bytes = recvfrom(socketUDP, buf, 80, 0, (struct sockaddr *) &client_addr, &client_addrlen);
-
-					/*if (bytes == -1) {
-
-						perror("Error recieve from\n");
-						return -1;
-					}*/
-					
-					printf("buff: %s\n", buf);
-
-					buf[bytes] = '\0';
+			printf("hijo\n");
 			
-					nameInfo = getnameinfo((struct sockaddr *) &client_addr,
-									client_addrlen, host, NI_MAXHOST,
-									serv, NI_MAXSERV, NI_NUMERICHOST|NI_NUMERICSERV);
-							
-					if (nameInfo == -1) {
-
-						perror("Error getnameinfo\n");
-						return -1;
-					}
-			
-					time_t tiempo = time(NULL);
-					struct tm *tm = localtime(&tiempo);
-					size_t max = 50;
-					char stringTiempo[max];
-
-					if (buf[0] == 't') {
-
-						ssize_t bytesHora = strftime(stringTiempo, max, "%H:%M:%S \n", tm);
-
-						stringTiempo[bytesHora] = '\0';
-
-						sendto(socketUDP, stringTiempo, bytesHora, 0, 
-								(struct sockaddr *) &client_addr, client_addrlen);
-					}
-					else if (buf[0] == 'd') {
-
-						ssize_t bytesFecha = strftime(stringTiempo, max, "%y-%m-%d \n", tm);
-
-						sendto(socketUDP, stringTiempo, bytesFecha, 0, 
-								(struct sockaddr *) &client_addr, client_addrlen);
-					}
-					else if (buf[0] == 'q') {
-
-						printf("Saliendo... \n");
-
-						close(socketUDP);
-
-						return 0;
-					}
-					else {
-
-						buf[bytes-1]='\0'; //Para eliminar el salto de linea que envia el cliente
-						printf("Comando %s no soportado \n", buf);
-					}
-			
-					return 0;
-				}
-			break;
-			//Padre
-			default:
-			
-				while(wait(NULL)>0);
-				//wait(0);
-				close(socketUDP);
+			while (1) {
 				
-				break;
-		}
-	}
-	
-	/*
-	
-	//Tuberia
-	fd_set rfds;
-	struct timeval timeout; //Tiempo máximo en el que retornará la función
-	int resSelect;
+				char buf[80];
+				char host[NI_MAXHOST];
+				char serv[NI_MAXSERV];
+			
+				struct sockaddr_storage client_addr;
+				socklen_t client_addrlen = sizeof(struct sockaddr_storage);
 
-	while (1) {
+				ssize_t bytes = recvfrom(socketUDP, buf, 80, 0, (struct sockaddr *) &client_addr, &client_addrlen);
 
-		FD_ZERO(&rfds); //Inicializa un conjunto como un conjunto vacío
-		FD_SET(0, &rfds); // 0: standard input
-		FD_SET(socketUDP, &rfds); //También agregamos la entrada del socket
-
-		//Timeval
-		timeout.tv_sec = 5;
-		timeout.tv_usec = 0;
-
-		//Sacado de teoría: el primer argumento es el número del fd + 1
-		resSelect = select(socketUDP + 1, &rfds, NULL, NULL, &timeout);
-
-		char buf[50];
-
-		if (resSelect == -1) {
-
-			perror("Error select()\n");
-		}
-		else if (resSelect) {
-
-			//File Descriptor: 0 (entrada estandar)
-			if (FD_ISSET(0, &rfds)) { //FD_ISSET comprueba si un descriptor está en un conjunto
-
-				int bytes = read(0, &buf, 50);
-				
 				if (bytes == -1) {
 
-					perror("FD 0, Error en read()\n");
-					return -1;
-				}
-				else if (bytes > 2) {
-
-					buf[bytes-1] = '\0';
-					printf("Comando '%s' NO reconocido. Usar 't', 'd' o 'q'\n", buf);
-				}
-
-				buf[bytes] = '\0';	//Recordar siempre esto, para evitar problemas
-
-				time_t tiempo = time(NULL);
-				struct tm *tm = localtime(&tiempo);
-
-				if (tm == NULL) {
-
-					perror("FD 0, Error en localtime\n");
+					perror("Error recieve from\n");
 					return -1;
 				}
 
-				char imprimir[50];
-
-				//Lectura del comando t
-				//if (buf == 't') {
-				if (strcmp(buf, "t\n") == 0 ) {
-
-					strftime(imprimir, 50, "%H:%M:%S", tm);
-					printf("La hora actual es: %s\n", imprimir);
-				}
-				//Lectura del comando d
-				else if (strcmp(buf, "d\n") == 0 ) {
-
-					strftime(imprimir, 50, "%y-%m-%d", tm);
-					printf("La fecha actual es: %s\n", imprimir);
-				}
-				//Lectura del comando q
-				else if (strcmp(buf, "q\n") == 0 ) {
-
-					printf("Saliendo...\n");
-
-					close(socketUDP);
-					return 0;
-				}
-				else {
-
-					buf[bytes-1] = '\0';
-					printf("Comando '%s' NO reconocido. Usar 't', 'd' o 'q'\n", buf);
-				}
-			}
-			//File Descriptor Socket UDP
-			else if (FD_ISSET(socketUDP, &rfds)) {
-
-				ssize_t bytes = recvfrom(socketUDP, buf, 2, 0, (struct sockaddr *) &cliente_addr,
-									&cliente_addrlen);
-		
-				if (bytes == -1) {
-
-					printf("Error recieve from\n");
-					return -1;
-				}
+			
+				printf("buff: %s", buf);
 
 				buf[bytes] = '\0';
-
-				nameInfo = getnameinfo((struct sockaddr *) &cliente_addr,
-							cliente_addrlen, host, NI_MAXHOST,
-							serv, NI_MAXSERV, NI_NUMERICHOST|NI_NUMERICSERV);
+				
+				nameInfo = getnameinfo((struct sockaddr *) &client_addr,
+					client_addrlen, host, NI_MAXHOST,
+					serv, NI_MAXSERV, NI_NUMERICHOST|NI_NUMERICSERV);
 
 				if (nameInfo == -1) {
 
@@ -302,14 +142,14 @@ int main(int argc, char** argv) {
 					stringTiempo[bytesHora] = '\0';
 
 					sendto(socketUDP, stringTiempo, bytesHora, 0, 
-							(struct sockaddr *) &cliente_addr, cliente_addrlen);
+							(struct sockaddr *) &client_addr, client_addrlen);
 				}
 				else if (buf[0] == 'd') {
 
 					ssize_t bytesFecha = strftime(stringTiempo, max, "%y-%m-%d \n", tm);
 
 					sendto(socketUDP, stringTiempo, bytesFecha, 0, 
-							(struct sockaddr *) &cliente_addr, cliente_addrlen);
+							(struct sockaddr *) &client_addr, client_addrlen);
 				}
 				else if (buf[0] == 'q') {
 
@@ -327,17 +167,13 @@ int main(int argc, char** argv) {
 			}
 		}
 		else {
-
-			printf("Ningún dato nuevo en 5 seg.\n");
+		
+			printf("Padre\n");
+			
+			while(wait(NULL)>0);
 		}
-	}*/
+	}
 
+	close(socketUDP);
 	return 0;
 }
-
-
-
-
-
-
-
