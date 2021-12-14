@@ -9,6 +9,17 @@
 #include <string.h>
 //time
 #include <time.h>
+//Select
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+
+void manejador (int signal) {
+
+	
+}
 
 
 int main(int argc, char** argv) {
@@ -25,11 +36,6 @@ int main(int argc, char** argv) {
 	struct addrinfo hints;
 	struct addrinfo *resultInfo;
 
-	//Sockets
-	//struct sockaddr_in;
-
-	//Otener todas las posibles direcciones con las que se podría crear un socket asociado a un 	//host dado como primer argumento del programa
-
 	memset(&hints, 0, sizeof(struct addrinfo));
 
 	//ai.family tipo de familia de la dirección (IPv4 o IPv6)
@@ -39,7 +45,6 @@ int main(int argc, char** argv) {
 
 	//ai.socktype especifica el tipo de socket a buscar.
 	// SOCK_STREAM, SOCK_DGRAM (como en UDP).
-	// Para nuestro caso, como queremos cualquiera, le asignamos 0.
 	hints.ai_socktype = SOCK_DGRAM;
 
 	//Especifica el protocolo de los sockets a retornar.
@@ -93,8 +98,16 @@ int main(int argc, char** argv) {
 
 	struct sockaddr_storage cliente_addr;
 	socklen_t cliente_addrlen = sizeof(struct sockaddr_storage);
+	
+	//Tuberia
+	fd_set rfds;
+	struct timeval timeout; //Tiempo máximo en el que retornará la función
 
 	while (1) {
+
+		FD_ZERO(&rfds); //Inicializa un conjunto como un conjunto vacío
+		FD_SET(0, &rfds); // 0: standard input
+		FD_SET(socketUDP, &rfds); //También agregamos la entrada del socket
 
 		ssize_t bytes = recvfrom(socketUDP, buf, 2, 0, (struct sockaddr *) &cliente_addr,
 									&cliente_addrlen);
@@ -159,3 +172,10 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
+
+
+
+
+
+
+
