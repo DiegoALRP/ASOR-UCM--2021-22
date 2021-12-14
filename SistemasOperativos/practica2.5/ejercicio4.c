@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
 		FD_SET(socketUDP, &rfds); //También agregamos la entrada del socket
 
 		//Timeval
-		timeout.tv_sec = 2;
+		timeout.tv_sec = 5;
 		timeout.tv_usec = 0;
 
 		//Sacado de teoría: el primer argumento es el número del fd + 1
@@ -135,6 +135,11 @@ int main(int argc, char** argv) {
 					perror("FD 0, Error en read()\n");
 					return -1;
 				}
+				else if (bytes > 2) {
+
+					buf[bytes-1] = '\0';
+					printf("Comando '%s' NO reconocido. Usar 't', 'd' o 'q'\n", buf);
+				}
 
 				buf[bytes] = '\0';	//Recordar siempre esto, para evitar problemas
 
@@ -150,17 +155,20 @@ int main(int argc, char** argv) {
 				char imprimir[50];
 
 				//Lectura del comando t
-				if (buf == 't') {
+				//if (buf == 't') {
+				if (strcmp(buf, "t\n") == 0 ) {
 
-					strftime(imprimir, 50, "%H:%M:%S", &tm);
+					strftime(imprimir, 50, "%H:%M:%S", tm);
 					printf("La hora actual es: %s\n", imprimir);
 				}
-				else if (buf == 'd') {
+				//Lectura del comando d
+				else if (strcmp(buf, "d\n") == 0 ) {
 
-					strftime(imprimir, 50, "%y-%m-%d", &tm);
+					strftime(imprimir, 50, "%y-%m-%d", tm);
 					printf("La fecha actual es: %s\n", imprimir);
 				}
-				else if (buf == 'q') {
+				//Lectura del comando q
+				else if (strcmp(buf, "q\n") == 0 ) {
 
 					printf("Saliendo...\n");
 
@@ -178,11 +186,11 @@ int main(int argc, char** argv) {
 		}
 		else {
 
-			printf("Ningún dato nuevo en 2 seg.\n");
+			printf("Ningún dato nuevo en 5 seg.\n");
 		}
 
 
-		ssize_t bytes = recvfrom(socketUDP, buf, 2, 0, (struct sockaddr *) &cliente_addr,
+		/*ssize_t bytes = recvfrom(socketUDP, buf, 2, 0, (struct sockaddr *) &cliente_addr,
 									&cliente_addrlen);
 		
 		if (bytes == -1) {
@@ -239,7 +247,7 @@ int main(int argc, char** argv) {
 
 			buf[bytes-1]='\0'; //Para eliminar el salto de linea que envia el cliente
 			printf("Comando %s no soportado \n", buf);
-		}
+		}*/
 
 	}
 
