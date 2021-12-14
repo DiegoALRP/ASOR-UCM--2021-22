@@ -242,67 +242,6 @@ int main(int argc, char** argv) {
 
 			printf("Ningún dato nuevo en 5 seg.\n");
 		}
-
-
-		/*ssize_t bytes = recvfrom(socketUDP, buf, 2, 0, (struct sockaddr *) &cliente_addr,
-									&cliente_addrlen);
-		
-		if (bytes == -1) {
-
-			printf("Error recieve from\n");
-			return -1;
-		}
-
-		buf[bytes] = '\0';
-
-		nameInfo = getnameinfo((struct sockaddr *) &cliente_addr,
-					cliente_addrlen, host, NI_MAXHOST,
-					serv, NI_MAXSERV, NI_NUMERICHOST|NI_NUMERICSERV);
-
-		if (nameInfo == -1) {
-
-			printf("Error getnameinfo\n");
-			return -1;
-		}
-
-		printf("Se han recibido %d bytes de host: %s, serv: %s\n", bytes, host, serv);
-
-
-		time_t tiempo = time(NULL);
-		struct tm *tm = localtime(&tiempo);
-		size_t max = 50;
-		char stringTiempo[max];
-
-		if (buf[0] == 't') {
-
-			ssize_t bytesHora = strftime(stringTiempo, max, "%H:%M:%S \n", tm);
-
-			stringTiempo[bytesHora] = '\0';
-
-			sendto(socketUDP, stringTiempo, bytesHora, 0, 
-					(struct sockaddr *) &cliente_addr, cliente_addrlen);
-		}
-		else if (buf[0] == 'd') {
-
-			ssize_t bytesFecha = strftime(stringTiempo, max, "%y-%m-%d \n", tm);
-
-			sendto(socketUDP, stringTiempo, bytesFecha, 0, 
-					(struct sockaddr *) &cliente_addr, cliente_addrlen);
-		}
-		else if (buf[0] == 'q') {
-
-			printf("Saliendo... \n");
-
-			close(socketUDP);
-
-			return 0;
-		}
-		else {
-
-			buf[bytes-1]='\0'; //Para eliminar el salto de linea que envia el cliente
-			printf("Comando %s no soportado \n", buf);
-		}*/
-
 	}
 
 	return 0;
