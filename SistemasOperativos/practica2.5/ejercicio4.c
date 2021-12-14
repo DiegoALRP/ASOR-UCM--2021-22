@@ -16,12 +16,6 @@
 #include <unistd.h>
 
 
-void manejador (int signal) {
-
-	
-}
-
-
 int main(int argc, char** argv) {
 
 	if (argc != 3) {
