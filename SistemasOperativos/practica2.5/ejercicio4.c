@@ -102,12 +102,85 @@ int main(int argc, char** argv) {
 	//Tuberia
 	fd_set rfds;
 	struct timeval timeout; //Tiempo máximo en el que retornará la función
+	int resSelect;
 
 	while (1) {
 
 		FD_ZERO(&rfds); //Inicializa un conjunto como un conjunto vacío
 		FD_SET(0, &rfds); // 0: standard input
 		FD_SET(socketUDP, &rfds); //También agregamos la entrada del socket
+
+		//Timeval
+		timeout.tv_sec = 2;
+		timeout.tv_usec = 0;
+
+		//Sacado de teoría: el primer argumento es el número del fd + 1
+		resSelect = select(socketUDP + 1, &rfds, NULL, NULL, &timeout);
+
+		char buf[50];
+
+		if (resSelect == -1) {
+
+			perror("Error select()\n");
+		}
+		else if (resSelect) {
+
+			//File Descriptor: 0 (entrada estandar)
+			if (FD_ISSET(0, &rfds)) { //FD_ISSET comprueba si un descriptor está en un conjunto
+
+				int bytes = read(0, &buf, 50);
+				
+				if (bytes == -1) {
+
+					perror("FD 0, Error en read()\n");
+					return -1;
+				}
+
+				buf[bytes] = '\0';	//Recordar siempre esto, para evitar problemas
+
+				time_t tiempo = time(NULL);
+				struct tm *tm = localtime(&tiempo);
+
+				if (tm == NULL) {
+
+					perror("FD 0, Error en localtime\n");
+					return -1;
+				}
+
+				char imprimir[50];
+
+				//Lectura del comando t
+				if (buf == 't') {
+
+					strftime(imprimir, 50, "%H:%M:%S", &tm);
+					printf("La hora actual es: %s\n", imprimir);
+				}
+				else if (buf == 'd') {
+
+					strftime(imprimir, 50, "%y-%m-%d", &tm);
+					printf("La fecha actual es: %s\n", imprimir);
+				}
+				else if (buf == 'q') {
+
+					printf("Saliendo...\n");
+
+					close(socketUDP);
+					return 0;
+				}
+				else {
+
+					buf[bytes-1] = '\0';
+					printf("Comando '%s' NO reconocido. Usar 't', 'd' o 'q'\n", buf);
+				}
+			}	
+						
+
+		}
+		else {
+
+			printf("Ningún dato nuevo en 2 seg.\n");
+		}
+
 
 		ssize_t bytes = recvfrom(socketUDP, buf, 2, 0, (struct sockaddr *) &cliente_addr,
 									&cliente_addrlen);
