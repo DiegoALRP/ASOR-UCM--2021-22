@@ -308,7 +308,104 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
+#include <iostream>
+
+void haz_msg(int sd)
+{
+char buffer[80];
+char host[NI_MAXHOST];
+char serv[NI_MAXSERV];
+
+struct sockaddr_storage client;
+socklen_t clientlen = sizeof(struct sockaddr_storage);
+
+int bytes = recvfrom(sd, buffer, 79, 0,
+(struct sockaddr *) &client, &clientlen);
+buffer[bytes] = '\0';
+
+getnameinfo((struct sockaddr *) &client, clientlen,
+host, NI_MAXHOST,
+serv, NI_MAXSERV,
+NI_NUMERICHOST | NI_NUMERICSERV);
+
+std::cout << "HOST: " << host << " SERV: " << serv << std::endl
+<< " MSG[" << getpid() <<"]: " << buffer;
+
+sleep(5);
+
+sendto(sd, buffer, bytes, 0, (struct sockaddr *) &client, clientlen);
+
+close(sd);
+}
+
+
+int main(int argc, char** argv)
+{
+struct addrinfo hints;
+struct addrinfo * res;
+
+memset(&hints, 0, sizeof(struct addrinfo));
+
+hints.ai_family = AF_UNSPEC;
+hints.ai_socktype = SOCK_DGRAM;
+hints.ai_flags = AI_PASSIVE;
+
+int rc = getaddrinfo(
+argv[1],
+argv[2],
+&hints,
+&res);
+
+if ( rc != 0 )
+{
+std::cout << "getaddrinfo: "
+<< gai_strerror(rc)
+<< std::endl;
+return 1;
+}
+
+int sd = socket(
+res->ai_family,
+res->ai_socktype,
+res->ai_protocol);
+
+bind(sd, res->ai_addr, res->ai_addrlen);
+
+for (int i = 0; i < 5; i++)
+{
+pid_t pid = fork();
+
+switch(pid)
+{
+case -1:
+return 1;
+case 0:
+haz_msg(sd);
+return 0;
+default:
+break;
+}
+}
+
+for ( int i = 0; i < 5 ; i++)
+{
+int hijo = wait(NULL);
+
+std::cout << " Termino HIJO: " << hijo << std::endl;
+}
+
+
+freeaddrinfo(res);
+
+return 0;
+}
 
 
 
