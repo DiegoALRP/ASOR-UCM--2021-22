@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#define N 2
 
 int main(int argc, char** argv) {
 
@@ -33,26 +34,17 @@ int main(int argc, char** argv) {
 	memset(&hints, 0, sizeof(struct addrinfo));
 
 	//ai.family tipo de familia de la dirección (IPv4 o IPv6)
-	//con AF_INET y AF_INET6 respectivamente.
-	//Si queremos cualquiera de las dos, se le asigna AF_UNSPEC.
 	hints.ai_family = AF_UNSPEC;
-
 	//ai.socktype especifica el tipo de socket a buscar.
-	// SOCK_STREAM, SOCK_DGRAM (como en UDP).
 	hints.ai_socktype = SOCK_DGRAM;
-
 	//Especifica el protocolo de los sockets a retornar.
-	// Le asignamos 0 para indicar que puede ser cualquier protocolo
-	hints.ai_protocol = 0;
-
+	/*hints.ai_protocol = 0;
 	//Esta especifica opciones adicionales.
-	// AI_PASSIVE indica que los sockets retornados podrán ser usados para bind(ing),
-	// que podrán aceptar conexiones.
+	// AI_PASSIVE indica que los sockets retornados podrán ser usados para bind(ing), que podrán aceptar conexiones.
 	hints.ai_flags = AI_PASSIVE;
-
 	hints.ai_canonname = NULL;
 	hints.ai_addr = NULL;
-	hints.ai_next = NULL;
+	hints.ai_next = NULL;*/
 
 	int rc = getaddrinfo(
 					argv[1],
@@ -83,15 +75,111 @@ int main(int argc, char** argv) {
 	}
 
 	freeaddrinfo(resultInfo);
-
-	char buf[2];
-	char host[NI_MAXHOST];
-	char serv[NI_MAXSERV];
+	
+	//time_t tiempo = time(NULL);
+	//struct tm *tm = localtime(&tiempo);
+	//size_t max = 50;
+	//char stringTiempo[max];
 
 	int nameInfo;
+	
+	int i;
+	for (i = 0; i < N; i++) {
+	
+		pid_t pid;
+		pid = fork();
+		
+		switch (pid) {
+		
+			case -1:
+				
+				perror("Error fork()");
+				return -1;
+			break;
+			//Hijo
+			case 0: ;
+			
+				while (1) {
 
-	struct sockaddr_storage cliente_addr;
-	socklen_t cliente_addrlen = sizeof(struct sockaddr_storage);
+					char buf[80];
+					char host[NI_MAXHOST];
+					char serv[NI_MAXSERV];
+					
+					struct sockaddr_storage client_addr;
+					socklen_t client_addrlen = sizeof(struct sockaddr_storage);
+		
+					ssize_t bytes = recvfrom(socketUDP, buf, 80, 0, (struct sockaddr *) &client_addr, &client_addrlen);
+
+					/*if (bytes == -1) {
+
+						perror("Error recieve from\n");
+						return -1;
+					}*/
+					
+					printf("buff: %s\n", buf);
+
+					buf[bytes] = '\0';
+			
+					nameInfo = getnameinfo((struct sockaddr *) &client_addr,
+									client_addrlen, host, NI_MAXHOST,
+									serv, NI_MAXSERV, NI_NUMERICHOST|NI_NUMERICSERV);
+							
+					if (nameInfo == -1) {
+
+						perror("Error getnameinfo\n");
+						return -1;
+					}
+			
+					time_t tiempo = time(NULL);
+					struct tm *tm = localtime(&tiempo);
+					size_t max = 50;
+					char stringTiempo[max];
+
+					if (buf[0] == 't') {
+
+						ssize_t bytesHora = strftime(stringTiempo, max, "%H:%M:%S \n", tm);
+
+						stringTiempo[bytesHora] = '\0';
+
+						sendto(socketUDP, stringTiempo, bytesHora, 0, 
+								(struct sockaddr *) &client_addr, client_addrlen);
+					}
+					else if (buf[0] == 'd') {
+
+						ssize_t bytesFecha = strftime(stringTiempo, max, "%y-%m-%d \n", tm);
+
+						sendto(socketUDP, stringTiempo, bytesFecha, 0, 
+								(struct sockaddr *) &client_addr, client_addrlen);
+					}
+					else if (buf[0] == 'q') {
+
+						printf("Saliendo... \n");
+
+						close(socketUDP);
+
+						return 0;
+					}
+					else {
+
+						buf[bytes-1]='\0'; //Para eliminar el salto de linea que envia el cliente
+						printf("Comando %s no soportado \n", buf);
+					}
+			
+					return 0;
+				}
+			break;
+			//Padre
+			default:
+			
+				while(wait(NULL)>0);
+				//wait(0);
+				close(socketUDP);
+				
+				break;
+		}
+	}
+	
+	/*
 	
 	//Tuberia
 	fd_set rfds;
@@ -242,170 +330,12 @@ int main(int argc, char** argv) {
 
 			printf("Ningún dato nuevo en 5 seg.\n");
 		}
-
-
-		/*ssize_t bytes = recvfrom(socketUDP, buf, 2, 0, (struct sockaddr *) &cliente_addr,
-									&cliente_addrlen);
-		
-		if (bytes == -1) {
-
-			printf("Error recieve from\n");
-			return -1;
-		}
-
-		buf[bytes] = '\0';
-
-		nameInfo = getnameinfo((struct sockaddr *) &cliente_addr,
-					cliente_addrlen, host, NI_MAXHOST,
-					serv, NI_MAXSERV, NI_NUMERICHOST|NI_NUMERICSERV);
-
-		if (nameInfo == -1) {
-
-			printf("Error getnameinfo\n");
-			return -1;
-		}
-
-		printf("Se han recibido %d bytes de host: %s, serv: %s\n", bytes, host, serv);
-
-
-		time_t tiempo = time(NULL);
-		struct tm *tm = localtime(&tiempo);
-		size_t max = 50;
-		char stringTiempo[max];
-
-		if (buf[0] == 't') {
-
-			ssize_t bytesHora = strftime(stringTiempo, max, "%H:%M:%S \n", tm);
-
-			stringTiempo[bytesHora] = '\0';
-
-			sendto(socketUDP, stringTiempo, bytesHora, 0, 
-					(struct sockaddr *) &cliente_addr, cliente_addrlen);
-		}
-		else if (buf[0] == 'd') {
-
-			ssize_t bytesFecha = strftime(stringTiempo, max, "%y-%m-%d \n", tm);
-
-			sendto(socketUDP, stringTiempo, bytesFecha, 0, 
-					(struct sockaddr *) &cliente_addr, cliente_addrlen);
-		}
-		else if (buf[0] == 'q') {
-
-			printf("Saliendo... \n");
-
-			close(socketUDP);
-
-			return 0;
-		}
-		else {
-
-			buf[bytes-1]='\0'; //Para eliminar el salto de linea que envia el cliente
-			printf("Comando %s no soportado \n", buf);
-		}*/
-
-	}
+	}*/
 
 	return 0;
 }
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/wait.h>
 
-#include <iostream>
-
-void haz_msg(int sd)
-{
-char buffer[80];
-char host[NI_MAXHOST];
-char serv[NI_MAXSERV];
-
-struct sockaddr_storage client;
-socklen_t clientlen = sizeof(struct sockaddr_storage);
-
-int bytes = recvfrom(sd, buffer, 79, 0,
-(struct sockaddr *) &client, &clientlen);
-buffer[bytes] = '\0';
-
-getnameinfo((struct sockaddr *) &client, clientlen,
-host, NI_MAXHOST,
-serv, NI_MAXSERV,
-NI_NUMERICHOST | NI_NUMERICSERV);
-
-std::cout << "HOST: " << host << " SERV: " << serv << std::endl
-<< " MSG[" << getpid() <<"]: " << buffer;
-
-sleep(5);
-
-sendto(sd, buffer, bytes, 0, (struct sockaddr *) &client, clientlen);
-
-close(sd);
-}
-
-
-int main(int argc, char** argv)
-{
-struct addrinfo hints;
-struct addrinfo * res;
-
-memset(&hints, 0, sizeof(struct addrinfo));
-
-hints.ai_family = AF_UNSPEC;
-hints.ai_socktype = SOCK_DGRAM;
-hints.ai_flags = AI_PASSIVE;
-
-int rc = getaddrinfo(
-argv[1],
-argv[2],
-&hints,
-&res);
-
-if ( rc != 0 )
-{
-std::cout << "getaddrinfo: "
-<< gai_strerror(rc)
-<< std::endl;
-return 1;
-}
-
-int sd = socket(
-res->ai_family,
-res->ai_socktype,
-res->ai_protocol);
-
-bind(sd, res->ai_addr, res->ai_addrlen);
-
-for (int i = 0; i < 5; i++)
-{
-pid_t pid = fork();
-
-switch(pid)
-{
-case -1:
-return 1;
-case 0:
-haz_msg(sd);
-return 0;
-default:
-break;
-}
-}
-
-for ( int i = 0; i < 5 ; i++)
-{
-int hijo = wait(NULL);
-
-std::cout << " Termino HIJO: " << hijo << std::endl;
-}
-
-
-freeaddrinfo(res);
-
-return 0;
-}
 
 
 
