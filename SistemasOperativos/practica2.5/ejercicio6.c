@@ -39,11 +39,11 @@ int main(int argc, char** argv) {
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
 	hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
-	//hints.ai_flags = AI_PASSIVE;    /* For wildcard IP address */
-	//hints.ai_protocol = 0;          /* Any protocol */
-	//hints.ai_canonname = NULL;
-	//hints.ai_addr = NULL;
-	//hints.ai_next = NULL;
+	hints.ai_flags = AI_PASSIVE;    /* For wildcard IP address */
+	hints.ai_protocol = 0;          /* Any protocol */
+	hints.ai_canonname = NULL;
+	hints.ai_addr = NULL;
+	hints.ai_next = NULL;
 	
 	int rc = getaddrinfo(
 						argv[1],
@@ -72,8 +72,6 @@ int main(int argc, char** argv) {
 		perror("Error bind()\n");
 		return -1;
 	}
-	
-	freeaddrinfo(resultInfo);
 	
 	//El segundo parámetro tiene que ser potencia de 2, y como mínimo 16
 	int l = listen(socketTCP, 16);
@@ -112,38 +110,12 @@ int main(int argc, char** argv) {
 		
 		printf("Conexión desde Host: %s Puerto: %s\n", host, serv);
 		
-		char buf[80];
-		int bytes = recv(socketTCP,buf,sizeof(buf),0);
-		if(bytes==-1)
-		{
-			perror("Error recv()");
-			return -1;
-		}
-		
-		while(bytes > 0)
-		{
-			buf[bytes]='\0';			
-			int sent = send(socketTCP,buf,bytes,0);
-			if(sent==-1)
-			{
-				perror("Error send()");
-				return -1;
-			}
-
-			bytes = recv(socketTCP,buf,sizeof(buf),0);
-			if(bytes==-1)
-			{
-				perror("Error recv()");
-				return -1;
-			}
-		}
-		
-		/*
 		//Comprobar mensaje!!
 		char buf[80];
 		ssize_t bytes;
 		
-		while (bytes = recv(socketTCP, buf, 80, 0)) {
+		//OJO: el recv se hace con el socket del accept, no el socket del socket()
+		while (bytes = recv(acc, buf, 80, 0)) {
 		
 			if (bytes == -1) {
 			
@@ -152,8 +124,12 @@ int main(int argc, char** argv) {
 			
 			buf[bytes] = '\0';
 			printf("\tMensaje: %s\n", buf);
-			send(socketTCP, buf, bytes, 0);
-		}*/
+			send(acc, buf, bytes, 0);
+		}
+		
+		printf("Conexión terminada\n");
+		
+		close(acc);
 	}
 	
 	close(socketTCP);
@@ -162,10 +138,3 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
-
-
-
-
-
-
-
