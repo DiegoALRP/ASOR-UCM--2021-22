@@ -9,13 +9,15 @@
 #include <string.h>
 //time
 #include <time.h>
+//read
+#include <unistd.h>
 
 
 int main(int argc, char** argv) {
 
-	if (argc != 4) {
+	if (argc != 3) {
 
-		printf("Introduce los parámetros necesarios: %s <dirección> <puerto> <comando>\n", 
+		printf("Introduce los parámetros necesarios: %s <dirección> <puerto>\n", 
 					argv[0]);
 		return -1;
 	}
@@ -43,58 +45,69 @@ int main(int argc, char** argv) {
 
 	if (rc != 0) {
 
-		printf("getaddrinfo: %s \n", gai_strerror(rc));
+		fprintf(stderr, "getaddrinfo: %s \n", gai_strerror(rc));
 		return -1;
 	}
 
-	int socketUDP = socket(resultInfo->ai_family, resultInfo->ai_socktype, 0);
+	int socketTCP = socket(resultInfo->ai_family, resultInfo->ai_socktype, 0);
 
-	if (socketUDP == -1) {
+	if (socketTCP == -1) {
 
-		printf("Error socket UDP\n");
+		fprintf(stderr, "Error socket()\n");
 		return -1;
 	}
 
 	
-	rc = connect(socketUDP, resultInfo->ai_addr, resultInfo->ai_addrlen);
+	rc = connect(socketTCP, resultInfo->ai_addr, resultInfo->ai_addrlen);
 
 	if (rc == -1) {
 
-		printf("Error connect()\n");
+		fprintf(stderr, "Error connect()\n");
 		return -1;
 	}
-
-	char cmd[2];
-	cmd[0] = argv[3][0]; // argv[3][0] significa obtener el primer caracter del 3er string
-	cmd[1] = '\0';
-
-	rc = sendto(socketUDP, cmd, 2, 0, resultInfo->ai_addr, resultInfo->ai_addrlen);
-
-	if (rc == -1) {
-
-		printf("Error sendto()\n");
-		return -1;
-	}
-
-	char buf[50];
-	struct sockaddr_storage addr;
-	socklen_t addr_len = sizeof(addr);
-	
-	int bytes = recvfrom(socketUDP, buf, 50, 0, (struct sockaddr *) &addr, &addr_len);
-	buf[bytes] = '\0';
-
-	printf("Recibido: %s\n", buf);
 
 	freeaddrinfo(resultInfo);
+	
+	char buf[80];
+	memset(buf,0,sizeof(buf));
+
+	while (1) {
+
+		ssize_t bytes = read(0, buf, 80);
+		if (bytes == -1) {
+		
+			fprintf(stderr, "Error read()\n");
+			return -1;
+		}
+		
+		buf[bytes] = '\0';
+		
+		if (strcmp(buf, "Q\n") == 0) {
+			
+			printf("Saliendo...\n");
+			break;
+		}
+		
+		rc = send(socketTCP, buf, bytes, 0);
+		if (rc == -1) {
+		
+			fprintf(stderr, "Error send()\n");
+			return -1;
+		}
+		
+		bytes = recv(socketTCP, buf, 80, 0);
+		if (bytes == -1) {
+		
+			fprintf(stderr, "Error recv()\n");
+			return -1;
+		}
+		
+		buf[bytes] = '\0';
+		printf("%s", buf);
+	}	
+
+	//freeaddrinfo(resultInfo);
+	close(socketTCP);
 
 	return 0;
 }
-
-
-
-
-
-
-
-
-
