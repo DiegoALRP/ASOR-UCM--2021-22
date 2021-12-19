@@ -22,7 +22,21 @@
 
 #define NPROC 2
 
+void manejador (int signal) {
 
+	int state;
+	
+	pid_t child = wait(&state);
+	
+	if (child == -1) {
+	
+		fprintf(stderr, "Error wait()\n");
+	}
+	else {
+	
+		printf("Hijo %d terminó en estado state: %d\n", child, state);
+	}
+}
 
 int main(int argc, char** argv) {
 
@@ -107,6 +121,13 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 	
+	//Señales
+	struct sigaction action;
+	
+	sigaction(SIGCHLD, NULL, &action);
+	action.sa_handler = manejador;
+	sigaction(SIGCHLD, &action, NULL);
+	
 	pid_t pid;
 	int count = 0;
 	while (1) {
@@ -180,16 +201,12 @@ int main(int argc, char** argv) {
 			printf("Proceso Padre\n");
 			
 			close(acc);
+			
+			signal(SIGCHLD, manejador);
+			//while(1);
 			//close(socketTCP);
 		}
 	}
 	
 	return 0;
 }
-
-
-
-
-
-
-
