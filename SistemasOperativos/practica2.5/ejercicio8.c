@@ -108,13 +108,9 @@ int main(int argc, char** argv) {
 	
 	pid_t pid;
 	int count = 0;
-	int accepts[16];
 	while (1) {
-	
-		int status = 0;
 		
 		printf("Vuelta %d\n", count);
-		//count++;
 		
 		struct sockaddr_storage addr;
 		socklen_t addrlen = sizeof(addr);
@@ -127,12 +123,10 @@ int main(int argc, char** argv) {
 			return -1;
 		}
 		
-		accepts[count] = acc;
-		//pid_t pid;
 		pid = fork();
 		
 		printf("Haciendo fork() #%d\n", count);
-		count++:
+		count++;
 		
 		if (pid == -1) {
 		
@@ -176,6 +170,7 @@ int main(int argc, char** argv) {
 			}
 			
 			printf("Hijo: 'Conexión Terminada'\n");
+			close(acc);
 			
 			return 0;
 		}
@@ -183,26 +178,10 @@ int main(int argc, char** argv) {
 		
 			printf("Proceso Padre\n");
 			
-			/*while ((pid = wait(&status)) > 0);
-			
-			printf("Padre: 'Conexión Terminada'\n");
-			
-			close(acc);*/
+			close(acc);
+			//close(socketTCP);
 		}
 	}
 	
-	while ((pid = wait(&status)) > 0);
-	
-	printf("Padre: 'Conexión Terminada'\n");
-	
-	close(acc);
-	
 	return 0;
 }
-
-
-
-
-
-
-
