@@ -11,6 +11,8 @@ int main () {
 	if (fd == -1) {
 	
 		printf("Error open() %d: %s\n", errno, strerror(errno));
+
+        return -1;
 	}
 	
 	return 0;
