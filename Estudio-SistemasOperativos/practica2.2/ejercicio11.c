@@ -8,6 +8,14 @@
 
 int main(int argc, char *argv[]) {
 
+    if (argc != 2) {
+	
+		printf("Introduce la ruta del fichero\n");
+		printf("Usage: %s <filename>\n", argv[0]);
+		
+		return -1;
+	}
+    
 	printf("argv[0]: %s, argv[1]: %s, argv[2]: fin\n", argv[0], argv[1]);
 
 	struct stat info;
