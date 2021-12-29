@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <string.h>
        
 int main(int argc, char *argv[]) {
 
@@ -27,7 +28,7 @@ int main(int argc, char *argv[]) {
 		
 		return -1;
 	}
-    
+
 	if (dup2(newfd, oldfd) == -1) {
 	
 		printf("Error dup2 %d: %s\n", errno, strerror(errno));
