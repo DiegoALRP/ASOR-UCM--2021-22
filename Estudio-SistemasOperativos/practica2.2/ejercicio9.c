@@ -58,4 +58,6 @@ int main() {
      * cambió el fichero en términos de su contenido.
      * Por ejemplo al usar write o truncate
      */
+
+    return 0;
 }
