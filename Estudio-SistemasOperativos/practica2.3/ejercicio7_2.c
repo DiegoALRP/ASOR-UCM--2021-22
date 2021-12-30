@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-//system
+//execvp
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
@@ -25,6 +25,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	printf("El comando terminó de ejecutarse\n");
+    //Para que se imprima habria que hacer fork y escribir el mensaje
+    //a traves del proceso padre, ya que con execvp se borra el programa
+    //y solo se ejecuta lo del execvp
 	
 	return 0;
 }
