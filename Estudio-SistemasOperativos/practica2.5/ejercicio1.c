@@ -64,5 +64,6 @@ int main(int argc, char *argv[]) {
 	}
 	
 	printf("Terminado!\n");
+    freeaddrinfo(result);
 	return 0;
 }
