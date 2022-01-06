@@ -9,6 +9,9 @@
 #include <sys/socket.h>
 //fork
 #include <unistd.h>
+//wait
+#include <sys/types.h>
+#include <sys/wait.h>
 
 int main(int argc, char *argv[]) {
 
@@ -83,6 +86,43 @@ int main(int argc, char *argv[]) {
 		
 			printf("Hijo %d (Padre %d)\n", getpid(), getppid());
 			
+			char buf_rd[80];
+			int bytes_rd;
+			while (bytes_rd = recv(accfd, buf_rd, 80, 0)) {
+			
+				printf("Le atiende el proceso: %d\n", getpid());
+				
+				char host[NI_MAXHOST];
+				char serv[NI_MAXSERV];
+				
+				int nameInfo = getnameinfo((struct sockaddr *) &client, client_len,
+                       host, NI_MAXHOST,
+                       serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+                       
+                printf("Conexión desde Host: %s, Puerto: %s\n", host, serv);
+				
+				if (bytes_rd == -1) {
+				
+					printf("Error recv() %d: %s\n", errno, strerror(errno));
+					
+					return -1;
+				}
+				
+				buf_rd[bytes_rd] = '\0';
+				printf("El servidor ha leido: %s", buf_rd);
+				
+				int bytes_sd = send(accfd, buf_rd, bytes_rd, 0);
+				
+				if (bytes_sd == -1) {
+				
+					printf("Error send() %d: %s\n", errno, strerror(errno));
+					
+					return -1;
+				}
+			}
+			
+			close(accfd);
+			return 0;
 		}
 		else {
 		
@@ -91,7 +131,7 @@ int main(int argc, char *argv[]) {
 	}
 
 
-
+	while(wait(NULL)>0);
 
 	return 0;
 }
