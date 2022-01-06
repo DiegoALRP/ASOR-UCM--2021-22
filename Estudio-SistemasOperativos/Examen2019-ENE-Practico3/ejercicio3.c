@@ -7,6 +7,8 @@
 //socket
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
+//fork
+#include <unistd.h>
 
 int main(int argc, char *argv[]) {
 
@@ -63,8 +65,29 @@ int main(int argc, char *argv[]) {
 	
 	while (1) {
 	
-		struct sockaddr_storage peer_addr;
-		socklen_t peer_addr_len;
+		struct sockaddr_storage client;
+		socklen_t client_len = sizeof(struct sockaddr_storage);
+		
+		int accfd = accept(socketfd, (struct sockaddr *) &client, &client_len);
+		
+		pid_t pid;
+		pid = fork();
+		
+		if (pid == -1) {
+		
+			printf("Error forf() %d: %s\n", errno, strerror(errno));
+			
+			return -1;
+		}
+		else if (pid == 0) {
+		
+			printf("Hijo %d (Padre %d)\n", getpid(), getppid());
+			
+		}
+		else {
+		
+			printf("Padre %d (Hijo %d)\n", getpid(), pid);
+		}
 	}
 
 
