@@ -5,9 +5,12 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-//socket
+//socket, bind, accept, recv, send
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
+//getnameinfo
+#include <sys/socket.h>
+#include <netdb.h>
 
 int main(int argc, char *argv[]) {
 
@@ -21,9 +24,6 @@ int main(int argc, char *argv[]) {
 	
 	struct addrinfo hints;
 	struct addrinfo *result;
-	
-	struct sockaddr_storage peer_addr;
-	socklen_t peer_addr_len;
 
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
@@ -34,14 +34,84 @@ int main(int argc, char *argv[]) {
 	hints.ai_addr = NULL;
 	hints.ai_next = NULL;
 
-	if (getaddrinfo(argv[1], argv[2], &hints, &res) != 0) {
+	if (getaddrinfo(argv[1], argv[2], &hints, &result) != 0) {
 	
 		printf("Error getaddringfo() %d: %s\n", errno, strerror(errno));
 		
 		return -1;
 	}
 
-
+	int socketfd = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	
+	if (socketfd == -1) {
+	
+		printf("Error socket() %d: %s\n", errno, strerror(errno));
+		
+		return -1;
+	}
+	
+	if (bind(socketfd, result->ai_addr, result->ai_addrlen) == -1) {
+	
+		printf("Error bind() %d: %s\n", errno, strerror(errno));
+		
+		return -1;
+	}
+	
+	if (listen(socketfd, 16) == -1) {
+	
+		printf("Error listen() %d: %s\n", errno, strerror(errno));
+		
+		return -1;
+	}
+	
+	freeaddrinfo(result);
+	
+	while (1) {
+	
+		struct sockaddr_storage client;
+		socklen_t client_len = sizeof(struct sockaddr_storage);
+	
+		int accfd = accept(socketfd, (struct sockaddr *) &client, &client_len);
+	
+		char host[NI_MAXHOST];
+		char serv[NI_MAXSERV];
+	
+		int nameInfo = getnameinfo((struct sockaddr *) &client, client_len,
+		                   host, NI_MAXHOST,
+		                   serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+		                   
+		if (nameInfo == -1) {
+		
+			printf("Error getnameinfo() %d: %s\n", errno, strerror(errno));
+		}
+	
+		printf("Conexión desde: Host: %s, Puerto: %s\n", host, serv);
+		
+		char buf_recv[80];
+		int bytes;
+		while (bytes = recv(accfd, buf_recv, 80, 0)) {
+		
+			if (bytes == -1) {
+			
+				printf("Error recv() %d: %s\n", errno, strerror(errno));
+				
+				return -1;
+			}
+			
+			buf_recv[bytes] = '\0';
+			printf("Mensaje recibido: %s\n", buf_recv);
+		
+			int bytes_sd = send(accfd, host, strlen(host), 0);
+			
+			if (bytes_sd == -1) {
+			
+				printf("Error send() %d: %s\n", errno, strerror(errno));
+				
+				return -1;
+			}
+		}
+	}
 
 	return 0;
 }
+
