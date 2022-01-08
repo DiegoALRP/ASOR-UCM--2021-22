@@ -11,7 +11,8 @@
 //getaddrinfo
 #include <sys/socket.h>
 #include <netdb.h>
-
+//time
+#include <time.h>
 
 int main (int argc, char *argv[]) {
 
@@ -68,7 +69,52 @@ int main (int argc, char *argv[]) {
 		char buf_rd[80];
 		int bytes_rd = recvfrom(socketfd, buf_rd, 80, 0, (struct sockaddr *) &client, &client_len);
 		
+		if (bytes_rd == -1) {
 		
+			printf("Error recvfrom() %d: %s\n", errno, strerror(errno));
+		
+			return -1;
+		}
+		
+		char host[NI_MAXHOST];
+		char serv[NI_MAXSERV];
+		
+		int nameInfo = getnameinfo((struct sockaddr *) &client, client_len,
+                       host, NI_MAXHOST,
+                       serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+                       
+       	if (nameInfo == -1) {
+       	
+       		printf("Error getnameinfo() %d: %s\n", errno, strerror(errno));
+		
+			return -1;
+       	}
+       	
+       	printf("Conexión desde Host: %s, Puerto: %s\n", host, serv);
+       	
+       	time_t tiempo;
+       	time(&tiempo);
+       	
+       	struct tm tiempolocal = *localtime(&tiempo);
+       	
+       	char buf_tiempo[100];
+       	int bytes_tiempo = strftime(buf_tiempo, 100, "%H:%M:%S\n", &tiempolocal);
+       	
+       	if (bytes_tiempo == -1) {
+       	
+       		printf("Error strftime() %d: %s\n", errno, strerror(errno));
+		
+			return -1;
+       	}
+       	
+       	int bytes_sd = sendto(socketfd, buf_tiempo, bytes_tiempo, 0, (struct sockaddr *) &client, client_len);
+       	
+       	if (bytes_sd == -1) {
+       	
+       		printf("Error sendto() %d: %s\n", errno, strerror(errno));
+		
+			return -1;
+       	}
 	}
 
 	return 0;
