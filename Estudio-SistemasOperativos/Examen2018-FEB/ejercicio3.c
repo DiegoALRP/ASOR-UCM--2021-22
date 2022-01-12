@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-//socket
+//socket, bind
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
 
@@ -51,7 +51,12 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 	
+	if (bind(socketfd, result->ai_addr, result->ai_addrlen) == -1) {
 	
+		printf("Error bind() %d: %s\n", errno, strerror(errno));
+		
+		return -1;
+	}
 
 	return 0;
 }
