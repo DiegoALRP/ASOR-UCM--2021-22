@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-//socket, bind
+//socket, bind, listen, accept
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
 
@@ -21,9 +21,6 @@ int main(int argc, char *argv[]) {
 	
 	struct addrinfo hints;
 	struct addrinfo *result;
-	
-	struct sockaddr_storage peer_addr;
-	socklen_t peer_addr_len;
 	
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
@@ -56,6 +53,23 @@ int main(int argc, char *argv[]) {
 		printf("Error bind() %d: %s\n", errno, strerror(errno));
 		
 		return -1;
+	}
+	
+	if (listen(socketfd, 16) == -1) {
+	
+		printf("Error listen() %d: %s\n", errno, strerror(errno));
+		
+		return -1;
+	}
+	
+	while (1) {
+	
+		struct sockaddr_storage client;
+		socklen_t client_len = sizeof(struct sockaddr_storage);
+		
+		int accfd = accept(socketfd, (struct sockaddr *) &client, &client_len);
+		
+		
 	}
 
 	return 0;
