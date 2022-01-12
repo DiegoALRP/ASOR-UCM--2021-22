@@ -1,4 +1,7 @@
-#VM1
+
+#####
+#VM1#
+#####
 [root@localhost ~]# ip link set eth0 up
 [root@localhost ~]# ip a add 192.168.0.1/24 dev eth0
 [root@localhost ~]# ip a
@@ -95,18 +98,20 @@ examen.es.	IN	SOA	ns.examen.es. contact.examen.es. (
 			3W12h;
 			2h20M;
 			)
-		IN	NS	ns
-		IN	MX	1	mail
-ns		IN	A	192.168.0.1
-www		IN	A	192.168.0.200
+			IN	NS	ns
+			IN	MX	1	mail
+ns			IN	A	192.168.0.1
+www			IN	A	192.168.0.200
 mail		IN	A	192.168.0.250
-examen.es	IN	CNAME	mail
+servidor	IN	CNAME	mail
 [root@localhost ~]# named-checkzone examen.es. /var/named/db.examen.es
 [root@localhost ~]# service named start
 [root@localhost ~]# service named status
 
 
-#VM2
+#####
+#VM2#
+#####
 [root@localhost ~]# ip link set eth0 up
 [root@localhost ~]# ip a add 192.168.0.2/24 dev eth0
 [root@localhost ~]# ip a
@@ -148,8 +153,8 @@ examen.es.		8400	IN	SOA	ns.examen.es. contact.examen.es. 2022010400 10800 900 18
 ;; SERVER: 192.168.0.1#53(192.168.0.1)
 ;; WHEN: Tue Jan 04 16:28:22 CET 2022
 ;; MSG SIZE  rcvd: 85
-
-[root@localhost ~]# dig soa examen.ess
+'
+[root@localhost ~]# dig soa examen.es
 
 ; <<>> DiG 9.9.4-RedHat-9.9.4-61.el7_5.1 <<>> soa examen.ess
 ;; global options: +cmd
