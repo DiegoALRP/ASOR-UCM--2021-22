@@ -34,10 +34,12 @@ int main(int argc, char *argv[]) {
 	hints.ai_addr = NULL;
 	hints.ai_next = NULL;
 	
-	if (getaddrinfo(argv[1], argv[2], &hints, &result) != 0) {
+	int s;
+	if (s = getaddrinfo(argv[1], argv[2], &hints, &result) != 0) {
 	
 		fprintf(stderr, "Error getaddrinfo(): %s\n", gai_strerror(s));
-		exit(EXIT_FAILURE);
+		
+		return -1;
 	}
 	
 	int socketfd = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
@@ -48,6 +50,8 @@ int main(int argc, char *argv[]) {
 		
 		return -1;
 	}
+	
+	
 
 	return 0;
 }
