@@ -1,4 +1,8 @@
-#VM1
+
+
+#####
+#VM1#
+#####
 [root@localhost ~]# ip link
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
@@ -22,7 +26,13 @@
 
 [root@localhost ~]# ip route add default via 192.168.0.3
 
-#VM2
+[root@localhost ~]# nc -l 7777
+
+
+
+#####
+#VM2#
+#####
 [root@localhost ~]# ip link
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
@@ -46,7 +56,13 @@
 
 [root@localhost ~]# ip route add default via 172.16.0.3
 
-#VM3 (Router)
+[root@localhost ~]# nc 172.16.0.3 80
+
+
+
+##############
+#VM3 (Router)#
+##############
 [root@localhost ~]# ip link
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
@@ -80,4 +96,6 @@
 
 [root@localhost ~]# sysctl net.ipv4.ip_forward=1
 
-iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eth1 -j MASQUERADE
+[root@localhost ~]# iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eth1 -j MASQUERADE
+[root@localhost ~]# iptables -t nat -A PREROUTING -d 172.16.0.0/16 -p tcp --dport 80 -j DNAT --to 192.168.0.1:7777
+
